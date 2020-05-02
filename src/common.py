@@ -1,6 +1,9 @@
 import argparse
+import csv
 import random
 import operator
+from pathlib import Path
+
 import numpy
 
 from deap import creator, tools
@@ -107,3 +110,13 @@ def get_pso_parameters(args):
     phi1 = random.uniform(0.5, 1.5) if args.randomPhi else args.phi__phi[0]
     phi2 = random.uniform(0.5, 1.5) if args.randomPhi else args.phi__phi[1]
     return weight, phi1, phi2
+
+
+def save_fitness_history(path, data):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    fitness_file = open(path + 'fitness.csv', 'w', newline='')
+    with fitness_file:
+        writer = csv.writer(fitness_file)
+        writer.writerow(('fitness', 'epoch'))
+        for row in data:
+            writer.writerow(row)
