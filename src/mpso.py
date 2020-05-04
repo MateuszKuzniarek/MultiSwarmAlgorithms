@@ -1,11 +1,12 @@
 import random
 
 from common import get_common_parser, display_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
-    save_fitness_history
+    save_fitness_history, add_pso_args_to_parser
 
 
 def parse_args():
     parser = get_common_parser()
+    add_pso_args_to_parser(parser)
     parser.add_argument("-se", "--swarmEpochs", type=int, default=3, help='number of epochs per swarm')
     args = parser.parse_args()
     return args
@@ -13,7 +14,7 @@ def parse_args():
 
 def run_pso(args, pop, toolbox, mpso_epoch):
     epoch = 0
-    bestValue = None
+    best_value = None
     history = []
 
     while epoch < args.swarmEpochs:
@@ -24,10 +25,10 @@ def run_pso(args, pop, toolbox, mpso_epoch):
             history.append([part.fitness.values[0], mpso_epoch * args.swarmEpochs + epoch])
             toolbox.update(part, best, weight, phi1, phi2)
 
-        bestValue = toolbox.evaluate(best)[0]
+        best_value = toolbox.evaluate(best)[0]
         epoch += 1
 
-    return bestValue, history
+    return best_value, history
 
 
 def run_mpso(args):

@@ -30,6 +30,10 @@ def get_common_parser():
     parser.add_argument("-e", "--epoch", type=int, help='number of epoch')
     parser.add_argument("-a", "--accuracy", type=float, help='expected accuracy')
 
+    return parser
+
+
+def add_pso_args_to_parser(parser):
     weighOptions = parser.add_mutually_exclusive_group(required=True)
     weighOptions.add_argument("-w", "--weight", type=float, help='constant inertial weight')
     weighOptions.add_argument("-rw", "--randomWeight", action="store_true", help='random inertial weight')
@@ -37,8 +41,6 @@ def get_common_parser():
     accelerationOptions = parser.add_mutually_exclusive_group(required=True)
     accelerationOptions.add_argument("-phi" "--phi", type=float, nargs=2, help='acceleration factors')
     accelerationOptions.add_argument("-rphi", "--randomPhi", action="store_true", help='random acceleration factors')
-
-    return parser
 
 
 def generate_particle(size, pmin, pmax):
@@ -85,7 +87,7 @@ def get_toolbox(size, pminimum, pmaximum, function):
     toolbox.register("particle", generate_particle, size=size, pmin=pminimum, pmax=pmaximum)
     toolbox.register("population", tools.initRepeat, list, toolbox.particle)
     toolbox.register("update", update_particle)
-    toolbox.register("evaluate", globals()[function])
+    toolbox.register("evaluate", get_function(function))
     return toolbox
 
 
@@ -118,3 +120,11 @@ def save_fitness_history(path, data):
         writer.writerow(('fitness', 'epoch'))
         for row in data:
             writer.writerow(row)
+
+
+def get_function(function_name):
+    switch = {
+        'sphere': benchmarks.sphere
+    }
+
+    return switch.get(function_name, benchmarks.sphere)

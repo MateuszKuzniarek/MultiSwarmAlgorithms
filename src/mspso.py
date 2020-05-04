@@ -4,11 +4,12 @@ from deap import creator
 from numpy import random
 
 from common import get_common_parser, display_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
-    save_fitness_history
+    save_fitness_history, add_pso_args_to_parser
 
 
 def parse_args():
     parser = get_common_parser()
+    add_pso_args_to_parser(parser)
     args = parser.parse_args()
     return args
 
