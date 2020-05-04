@@ -1,6 +1,4 @@
-import csv
 import random
-from pathlib import Path
 
 from common import get_common_parser, display_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
     save_fitness_history

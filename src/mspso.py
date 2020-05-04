@@ -1,8 +1,7 @@
-import csv
-import random
-from pathlib import Path
+import operator
 
 from deap import creator
+from numpy import random
 
 from common import get_common_parser, display_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
     save_fitness_history
@@ -21,7 +20,11 @@ def update_swarm(args, pop, toolbox, epoch):
     for part in pop:
         if part != best:
             history.append([part.fitness.values[0], epoch])
-            toolbox.update(part, best, weight, phi1, phi2)
+            random_chance = random.rand()
+            if random_chance < 0.6:
+                toolbox.update(part, best, weight, phi1, phi2)
+            else:
+                part[:] = list(map(operator.mul, part, random.normal(0, 1, len(part))))
 
     best_value = toolbox.evaluate(best)[0]
     return best, best_value, history
@@ -35,7 +38,8 @@ def update_elite_particles(current_swarm, swarms, epoch):
         for swarm in swarms:
             if swarm != current_swarm:
                 dimension_sum += swarm.best[i]
-        new_position.append(dimension_sum / (len(swarms) - 1))
+        value = (dimension_sum / (len(swarms) - 1)) * (1 + random.normal(0, 1))
+        new_position.append(value)
     best_index = current_swarm.index(current_swarm.best)
     for i in range(0, len(current_swarm.best)):
         current_swarm[best_index][i] = new_position[i]

@@ -100,8 +100,6 @@ def evaluate_particles(pop, toolbox):
             best = creator.Particle(part)
             best.fitness.values = part.fitness.values
 
-    if best not in pop:
-        print('a')
     return best
 
 
