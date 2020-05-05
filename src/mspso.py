@@ -4,7 +4,7 @@ from deap import creator
 from numpy import random
 
 from common import get_common_parser, display_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
-    save_fitness_history, add_pso_args_to_parser
+    save_fitness_history, add_pso_args_to_parser, save_best_fitness_history
 
 
 def parse_args():
@@ -52,6 +52,7 @@ def run_mspso(args):
     toolbox = get_toolbox(args.size, args.pminimum, args.pmaximum, args.function)
     pop = toolbox.population(n=args.population)
     history = []
+    best_history = []
     swarm_size = int(args.population/args.subswarms)
     divided_pop = [pop[x:x+swarm_size] for x in range(0, len(pop), swarm_size)]
     swarms = []
@@ -60,34 +61,39 @@ def run_mspso(args):
     epoch = 0
     best_accuracy = float("inf")
     while (args.epoch is None or epoch < args.epoch) and (args.accuracy is None or best_accuracy > args.accuracy):
+        best_fitness = None
         for swarm in swarms:
             swarm.best, swarm.best_value, partial_history = update_swarm(args, swarm, toolbox, epoch)
             history += partial_history
-            accuracy = abs(args.solution - swarm.best_value)
-            if best_accuracy > accuracy:
-                best_accuracy = accuracy
+            if best_fitness is None or best_fitness < swarm.best.fitness.values[0]:
+                best_fitness = swarm.best.fitness.values[0]
+                accuracy = abs(args.solution - swarm.best_value)
+                if best_accuracy > accuracy:
+                    best_accuracy = accuracy
+        best_history.append((best_fitness, epoch))
         for swarm in swarms:
             elite_particles_history = update_elite_particles(swarm, swarms, epoch)
             history += elite_particles_history
         epoch += 1
-    save_fitness_history("../results/mspso/", history)
-    return epoch, best_accuracy
+    return epoch, best_accuracy, history, best_history
 
 
 def main():
     args = parse_args()
-
     set_creator(args.minimum)
     creator.create("Swarm", list, best=list, best_value=None)
-
+    best_histories = []
     epochs = []
     accuracies = []
     for i in range(args.iteration):
         result = run_mspso(args)
+        save_fitness_history("../results/mspso/", result[2])
+        best_histories.append(result[3])
         accuracies.append(result[1])
         if accuracies[i] <= args.accuracy:
             epochs.append(result[0])
 
+    save_best_fitness_history("../results/mspso/", best_histories)
     display_results(epochs, accuracies, args.accuracy)
 
 

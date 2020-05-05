@@ -122,9 +122,39 @@ def save_fitness_history(path, data):
             writer.writerow(row)
 
 
+def save_best_fitness_history(path, best_histories):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    fitness_file = open(path + 'best_fitness.csv', 'w', newline='')
+    with fitness_file:
+        writer = csv.writer(fitness_file)
+        writer.writerow(('fitness', 'epoch'))
+        min_length = max(map(len, best_histories))
+        for i in range(0, min_length):
+            fitness_sum = 0
+            number_of_runs = 0
+            for j in range (0, len(best_histories)):
+                if i < len(best_histories[j]):
+                    number_of_runs += 1
+                    fitness_sum += best_histories[j][i][0]
+            writer.writerow((fitness_sum/number_of_runs, i))
+
+
+def merge_best_histories(best_history, partial_best_history, is_minimum):
+    if len(best_history) == 0:
+        best_history[:] = [i for i in partial_best_history]
+    for i in range(0, len(best_history)):
+        if is_minimum:
+            if best_history[i] > partial_best_history[i]:
+                best_history[i] = partial_best_history[i]
+        else:
+            if best_history[i] < partial_best_history[i]:
+                best_history[i] = partial_best_history[i]
+
+
 def get_function(function_name):
     switch = {
-        'sphere': benchmarks.sphere
+        'sphere': benchmarks.sphere,
+        'griewank': benchmarks.griewank
     }
 
     return switch.get(function_name, benchmarks.sphere)
