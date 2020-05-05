@@ -22,6 +22,7 @@ def get_common_parser():
     parser.add_argument("-pmax", "--pmaximum", type=float, default=100.0, help='partition maximum')
     parser.add_argument("-s", "--solution", type=float, default=0.0, help='expected solution (for -a stop condition)')
     parser.add_argument("-ss", "--subswarms", type=int, default=3, help='number of sub-swarms')
+    parser.add_argument("-l", "--logCatalog", type=str, default='logs', help='number of sub-swarms')
 
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("-min", "--minimum", action="store_true", help='minimum searching mode')
@@ -64,15 +65,23 @@ def sphere(individual):
     return benchmarks.sphere(individual)
 
 
-def display_results(epochs, accuracies, expected_accuracy):
-    print(epochs)
-    is_solution_found_list = list(map(lambda acc: acc <= expected_accuracy, accuracies))
-    print(is_solution_found_list)
-    print(is_solution_found_list.count(True) / len(is_solution_found_list) * 100)
-    if len(epochs) > 0:
-        print(numpy.average(epochs))
-    else:
-        print("-")
+def display_and_save_results(epochs, accuracies, expected_accuracy, path):
+    Path(path).mkdir(parents=True, exist_ok=True)
+    fitness_file = open(path + 'measures.csv', 'w', newline='')
+    with fitness_file:
+        writer = csv.writer(fitness_file)
+        print(epochs)
+        is_solution_found_list = list(map(lambda acc: acc <= expected_accuracy, accuracies))
+        print(is_solution_found_list)
+        effectiveness = is_solution_found_list.count(True) / len(is_solution_found_list) * 100
+        writer.writerow(('effectiveness', effectiveness))
+        print(effectiveness)
+        if len(epochs) > 0:
+            average_records = numpy.average(epochs)
+            print(average_records)
+            writer.writerow(('mean records', average_records))
+        else:
+            print("-")
 
 
 def set_creator(is_minimum):
@@ -132,11 +141,12 @@ def save_best_fitness_history(path, best_histories):
         for i in range(0, min_length):
             fitness_sum = 0
             number_of_runs = 0
-            for j in range (0, len(best_histories)):
-                if i < len(best_histories[j]):
+            for j in range(0, len(best_histories)):
+                if i < len(best_histories[j]) and not numpy.isnan(best_histories[j][i][0]):
                     number_of_runs += 1
                     fitness_sum += best_histories[j][i][0]
-            writer.writerow((fitness_sum/number_of_runs, i))
+            if number_of_runs != 0:
+                writer.writerow((fitness_sum/number_of_runs, i))
 
 
 def merge_best_histories(best_history, partial_best_history, is_minimum):

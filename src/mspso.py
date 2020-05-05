@@ -3,7 +3,7 @@ import operator
 from deap import creator
 from numpy import random
 
-from common import get_common_parser, display_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
+from common import get_common_parser, display_and_save_results, set_creator, get_toolbox, evaluate_particles, get_pso_parameters, \
     save_fitness_history, add_pso_args_to_parser, save_best_fitness_history
 
 
@@ -87,14 +87,14 @@ def main():
     accuracies = []
     for i in range(args.iteration):
         result = run_mspso(args)
-        save_fitness_history("../results/mspso/", result[2])
+        save_fitness_history("../results/" + args.logCatalog + "/", result[2])
         best_histories.append(result[3])
         accuracies.append(result[1])
         if accuracies[i] <= args.accuracy:
             epochs.append(result[0])
 
-    save_best_fitness_history("../results/mspso/", best_histories)
-    display_results(epochs, accuracies, args.accuracy)
+    save_best_fitness_history("../results/" + args.logCatalog + "/", best_histories)
+    display_and_save_results(epochs, accuracies, args.accuracy, "../results/" + args.logCatalog + "/")
 
 
 if __name__ == "__main__":

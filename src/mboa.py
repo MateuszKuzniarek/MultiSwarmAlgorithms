@@ -3,7 +3,7 @@ import operator
 from deap import base, creator, tools
 from numpy import random
 
-from common import get_common_parser, display_results, generate_particle, get_function, save_fitness_history, \
+from common import get_common_parser, display_and_save_results, generate_particle, get_function, save_fitness_history, \
     merge_best_histories, save_best_fitness_history
 
 
@@ -118,14 +118,14 @@ def main():
     accuracies = []
     for i in range(args.iteration):
         result = run_mboa(args)
-        save_fitness_history("../results/mboa/", result[2])
+        save_fitness_history("../results/" + args.logCatalog + "/", result[2])
         best_histories.append(result[3])
         accuracies.append(result[1])
         if accuracies[i] <= args.accuracy:
             epochs.append(result[0] * args.swarmEpochs)
 
-    save_best_fitness_history("../results/mboa/", best_histories)
-    display_results(epochs, accuracies, args.accuracy)
+    save_best_fitness_history("../results/" + args.logCatalog + "/", best_histories)
+    display_and_save_results(epochs, accuracies, args.accuracy, "../results/" + args.logCatalog + "/")
 
 
 if __name__ == "__main__":
